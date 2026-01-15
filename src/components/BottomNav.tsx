@@ -11,18 +11,26 @@ export default function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-campus-card border-t border-campus-border z-50">
-            <div className="max-w-lg mx-auto flex justify-around items-center py-2">
-                {navItems.map(({ to, icon: Icon, label }) => (
+        <nav className="app-bottom-nav">
+            <div className="flex items-center justify-around py-2">
+                {navItems.map((item) => (
                     <NavLink
-                        key={to}
-                        to={to}
+                        key={item.to}
+                        to={item.to}
                         className={({ isActive }) =>
-                            `nav-item py-2 px-4 ${isActive ? 'active' : ''}`
+                            `nav-item touch-ripple py-2 px-4 rounded-xl ${isActive ? 'active' : ''}`
                         }
                     >
-                        <Icon size={24} />
-                        <span className="text-xs">{label}</span>
+                        {({ isActive }) => (
+                            <>
+                                <item.icon
+                                    size={24}
+                                    strokeWidth={isActive ? 2.5 : 2}
+                                    className="transition-all duration-200"
+                                />
+                                <span className="text-[10px] font-medium">{item.label}</span>
+                            </>
+                        )}
                     </NavLink>
                 ))}
             </div>

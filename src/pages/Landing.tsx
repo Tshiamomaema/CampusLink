@@ -1,57 +1,65 @@
 import { Link } from 'react-router-dom';
-import { Zap, Users, ShoppingBag, MessageCircle, ArrowRight } from 'lucide-react';
+import { Zap, Users, ShoppingBag, MessageCircle, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Landing() {
     const features = [
         {
             icon: Users,
-            title: 'Connect with Students',
-            description: 'Join a community of verified university students across the country',
+            title: 'Connect',
+            description: 'Verified university students only',
         },
         {
             icon: MessageCircle,
-            title: 'Share & Engage',
-            description: 'Post updates, share photos, and engage with campus content',
+            title: 'Share',
+            description: 'Posts, photos & stories',
         },
         {
             icon: ShoppingBag,
-            title: 'Student Marketplace',
-            description: 'Buy and sell textbooks, electronics, and more with fellow students',
+            title: 'Trade',
+            description: 'Student marketplace',
         },
     ];
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col safe-area-top safe-area-bottom">
             {/* Hero Section */}
-            <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center">
-                {/* Logo */}
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="bg-primary-500 p-3 rounded-2xl">
-                        <Zap size={36} className="text-white" />
+            <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center">
+                {/* Logo with animation */}
+                <div className="flex items-center gap-3 mb-8 animate-slide-up">
+                    <div className="bg-primary-500 p-3 rounded-2xl shadow-lg shadow-primary-500/30">
+                        <Zap size={32} className="text-white" />
                     </div>
-                    <span className="text-4xl font-bold">CampusLink</span>
+                    <span className="text-3xl font-bold">CampusLink</span>
                 </div>
 
                 {/* Tagline */}
-                <h1 className="text-3xl md:text-4xl font-bold mb-4 max-w-lg">
-                    Your <span className="text-gradient">University</span>, Your <span className="text-gradient">Community</span>
-                </h1>
-                <p className="text-gray-400 text-lg mb-8 max-w-md">
-                    Connect with students from your campus and universities across the country. Share, discover, and trade.
-                </p>
+                <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                        <Sparkles size={16} className="text-primary-400" />
+                        <span className="text-primary-400 text-sm font-medium">For Students Only</span>
+                        <Sparkles size={16} className="text-primary-400" />
+                    </div>
+                    <h1 className="text-3xl font-bold mb-4">
+                        Your <span className="text-gradient">Campus</span>,<br />
+                        Your <span className="text-gradient">Community</span>
+                    </h1>
+                    <p className="text-gray-400 mb-8 max-w-xs mx-auto">
+                        Connect with students from your campus and universities across the country
+                    </p>
+                </div>
 
                 {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+                <div className="flex flex-col gap-3 w-full max-w-xs animate-slide-up" style={{ animationDelay: '200ms' }}>
                     <Link
                         to="/signup"
-                        className="btn-primary flex-1 flex items-center justify-center gap-2"
+                        className="btn-primary flex items-center justify-center gap-2 text-lg"
                     >
                         Get Started
-                        <ArrowRight size={18} />
+                        <ArrowRight size={20} />
                     </Link>
                     <Link
                         to="/login"
-                        className="btn-secondary flex-1"
+                        className="btn-secondary text-center"
                     >
                         Sign In
                     </Link>
@@ -59,23 +67,23 @@ export default function Landing() {
             </div>
 
             {/* Features Section */}
-            <div className="px-4 pb-12">
-                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="px-6 pb-8">
+                <div className="grid grid-cols-3 gap-3 stagger-children">
                     {features.map((feature, index) => (
-                        <div key={index} className="card p-6 text-center">
-                            <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center mx-auto mb-4">
-                                <feature.icon size={24} className="text-primary-400" />
+                        <div key={index} className="card-pressable p-4 text-center">
+                            <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center mx-auto mb-2">
+                                <feature.icon size={20} className="text-primary-400" />
                             </div>
-                            <h3 className="font-semibold mb-2">{feature.title}</h3>
-                            <p className="text-gray-400 text-sm">{feature.description}</p>
+                            <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
+                            <p className="text-gray-500 text-xs leading-tight">{feature.description}</p>
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Footer */}
-            <div className="text-center py-6 text-gray-500 text-sm">
-                © 2026 CampusLink. For verified university students only.
+            <div className="text-center py-4 text-gray-600 text-xs">
+                © 2026 CampusLink
             </div>
         </div>
     );
