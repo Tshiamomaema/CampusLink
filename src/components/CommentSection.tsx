@@ -8,10 +8,11 @@ import { Link } from 'react-router-dom';
 
 interface CommentSectionProps {
     postId: string;
+    postOwnerId: string;
     isOpen: boolean;
 }
 
-export default function CommentSection({ postId, isOpen }: CommentSectionProps) {
+export default function CommentSection({ postId, postOwnerId, isOpen }: CommentSectionProps) {
     const { profile } = useAuth();
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(false);
@@ -67,6 +68,16 @@ export default function CommentSection({ postId, isOpen }: CommentSectionProps) 
         if (!error && data) {
             setComments(prev => [...prev, data as Comment]);
             setNewComment('');
+
+            // Create notification for post owner (if not commenting on own post)
+            if (postOwnerId !== profile.id) {
+                await supabase.from('notifications').insert({
+                    user_id: postOwnerId,
+                    type: 'comment',
+                    actor_id: profile.id,
+                    post_id: postId,
+                });
+            }
         }
 
         setSubmitting(false);

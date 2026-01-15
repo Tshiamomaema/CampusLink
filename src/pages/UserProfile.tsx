@@ -85,6 +85,13 @@ export default function UserProfile() {
                 .insert({ follower_id: currentProfile.id, following_id: userId });
             setIsFollowing(true);
             setStats(prev => ({ ...prev, followers: prev.followers + 1 }));
+
+            // Create notification for the user being followed
+            await supabase.from('notifications').insert({
+                user_id: userId,
+                type: 'follow',
+                actor_id: currentProfile.id,
+            });
         }
 
         setFollowLoading(false);
@@ -184,8 +191,8 @@ export default function UserProfile() {
                         onClick={handleFollow}
                         disabled={followLoading}
                         className={`w-full mt-6 py-3 rounded-xl font-semibold transition-colors ${isFollowing
-                                ? 'bg-campus-card border border-campus-border text-white hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400'
-                                : 'bg-primary-500 text-white hover:bg-primary-600'
+                            ? 'bg-campus-card border border-campus-border text-white hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400'
+                            : 'bg-primary-500 text-white hover:bg-primary-600'
                             }`}
                     >
                         {followLoading ? (

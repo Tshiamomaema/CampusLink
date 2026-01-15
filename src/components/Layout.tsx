@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
+import NotificationDropdown from './NotificationDropdown';
 import BottomNav from './BottomNav';
 
 export default function Layout() {
@@ -31,7 +32,7 @@ export default function Layout() {
                         <Logo size={28} />
                     </div>
 
-                    <div className="w-8"></div>
+                    <NotificationDropdown />
                 </div>
             </header>
 

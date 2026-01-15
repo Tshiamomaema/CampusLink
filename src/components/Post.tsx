@@ -33,6 +33,16 @@ export default function Post({ post, onLikeUpdate }: PostProps) {
                 .insert({ post_id: post.id, user_id: profile.id });
             setLiked(true);
             setLikesCount(prev => prev + 1);
+
+            // Create notification for post owner (if not liking own post)
+            if (post.user_id !== profile.id) {
+                await supabase.from('notifications').insert({
+                    user_id: post.user_id,
+                    type: 'like',
+                    actor_id: profile.id,
+                    post_id: post.id,
+                });
+            }
         }
 
         onLikeUpdate?.(post.id, !liked);

@@ -13,6 +13,7 @@ import CreateListing from './pages/CreateListing';
 import ListingDetail from './pages/ListingDetail';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
+import Notifications from './pages/Notifications';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -77,6 +78,7 @@ function AppRoutes() {
         <Route path="marketplace/:listingId" element={<ListingDetail />} />
         <Route path="profile" element={<Profile />} />
         <Route path="user/:userId" element={<UserProfile />} />
+        <Route path="notifications" element={<Notifications />} />
       </Route>
 
       {/* Redirect unknown routes */}
