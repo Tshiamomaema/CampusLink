@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export default function Landing() {
     return (
@@ -9,7 +9,7 @@ export default function Landing() {
                 {/* Logo */}
                 <div className="mb-12 animate-slide-up">
                     <div className="bg-primary-500 p-4 rounded-full">
-                        <Zap size={48} className="text-white" />
+                        <Logo size={48} className="text-white" />
                     </div>
                 </div>
 

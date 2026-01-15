@@ -1,6 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Zap } from 'lucide-react';
+import Logo from './Logo';
 import BottomNav from './BottomNav';
 
 export default function Layout() {
@@ -27,8 +27,8 @@ export default function Layout() {
                         )}
                     </Link>
 
-                    <div className="bg-primary-500 p-1.5 rounded-full">
-                        <Zap size={18} className="text-white" />
+                    <div className="text-primary-500">
+                        <Logo size={28} />
                     </div>
 
                     <div className="w-8"></div>

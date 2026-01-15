@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import Logo from '../components/Logo';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -33,8 +34,8 @@ export default function Login() {
                 <Link to="/welcome" className="p-2 hover:bg-white/10 rounded-full transition-colors">
                     <X size={20} className="text-twitter-textLight" />
                 </Link>
-                <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">⚡</span>
+                <div className="text-primary-500">
+                    <Logo size={28} />
                 </div>
                 <div className="w-10"></div>
             </div>
