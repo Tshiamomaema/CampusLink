@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { isUniversityEmail, getUniversityName } from '../lib/university';
+import Logo from '../components/Logo';
 
 export default function Signup() {
     const [fullName, setFullName] = useState('');
@@ -51,18 +52,18 @@ export default function Signup() {
 
     if (success) {
         return (
-            <div className="min-h-screen flex items-center justify-center px-4">
-                <div className="w-full max-w-md text-center">
-                    <div className="card p-8">
+            <div className="min-h-screen flex flex-col bg-black safe-area-top safe-area-bottom">
+                <div className="flex-1 flex items-center justify-center px-8">
+                    <div className="w-full max-w-sm text-center">
                         <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                             <CheckCircle size={32} className="text-green-400" />
                         </div>
-                        <h1 className="text-2xl font-bold mb-2">Check your email</h1>
-                        <p className="text-gray-400 mb-6">
-                            We've sent a verification link to <span className="text-white font-medium">{email}</span>
+                        <h1 className="text-2xl font-bold text-twitter-textLight mb-2">Check your email</h1>
+                        <p className="text-twitter-textGray mb-6">
+                            We've sent a verification link to <span className="text-twitter-textLight font-medium">{email}</span>
                         </p>
                         <Link to="/login" className="btn-primary inline-block">
-                            Back to Login
+                            Back to Sign in
                         </Link>
                     </div>
                 </div>
@@ -71,118 +72,120 @@ export default function Signup() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-8">
-            <div className="w-full max-w-md">
-                {/* Logo */}
-                <div className="flex items-center justify-center gap-2 mb-8">
-                    <div className="bg-primary-500 p-2 rounded-xl">
-                        <Zap size={28} className="text-white" />
+        <div className="min-h-screen flex flex-col bg-black safe-area-top safe-area-bottom">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4">
+                <Link to="/welcome" className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <X size={20} className="text-twitter-textLight" />
+                </Link>
+                <div className="text-primary-500">
+                    <Logo size={28} />
+                </div>
+                <div className="w-10"></div>
+            </div>
+
+            {/* Form */}
+            <div className="flex-1 px-8 pt-4 pb-8 overflow-y-auto">
+                <h1 className="text-2xl font-bold text-twitter-textLight mb-6">
+                    Create your account
+                </h1>
+
+                {error && (
+                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6">
+                        <AlertCircle size={18} />
+                        <span className="text-sm">{error}</span>
                     </div>
-                    <span className="text-2xl font-bold">CampusLink</span>
-                </div>
+                )}
 
-                {/* Card */}
-                <div className="card p-8">
-                    <h1 className="text-2xl font-bold text-center mb-2">Join CampusLink</h1>
-                    <p className="text-gray-400 text-center mb-8">Connect with your campus community</p>
-
-                    {error && (
-                        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6">
-                            <AlertCircle size={18} />
-                            <span className="text-sm">{error}</span>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                        <div className="relative">
+                            <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-twitter-textGray" />
+                            <input
+                                type="text"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                className="input pl-12"
+                                placeholder="Full name"
+                                required
+                            />
                         </div>
-                    )}
+                    </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Full Name</label>
-                            <div className="relative">
-                                <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                                <input
-                                    type="text"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    className="input pl-11"
-                                    placeholder="John Doe"
-                                    required
-                                />
+                    <div>
+                        <div className="relative">
+                            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-twitter-textGray" />
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="input pl-12"
+                                placeholder="University email"
+                                required
+                            />
+                        </div>
+                        {email && (
+                            <div className={`mt-2 text-sm ${isValidUniversityEmail ? 'text-green-400' : 'text-yellow-400'}`}>
+                                {isValidUniversityEmail ? (
+                                    <span className="flex items-center gap-1">
+                                        <CheckCircle size={14} />
+                                        {detectedUniversity}
+                                    </span>
+                                ) : (
+                                    'Use a university email (.ac.za or .edu)'
+                                )}
                             </div>
+                        )}
+                    </div>
+
+                    <div>
+                        <div className="relative">
+                            <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-twitter-textGray" />
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="input pl-12"
+                                placeholder="Password"
+                                required
+                                minLength={6}
+                            />
                         </div>
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">University Email</label>
-                            <div className="relative">
-                                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="input pl-11"
-                                    placeholder="you@university.ac.za"
-                                    required
-                                />
-                            </div>
-                            {email && (
-                                <div className={`mt-2 text-sm ${isValidUniversityEmail ? 'text-green-400' : 'text-yellow-400'}`}>
-                                    {isValidUniversityEmail ? (
-                                        <span className="flex items-center gap-1">
-                                            <CheckCircle size={14} />
-                                            {detectedUniversity}
-                                        </span>
-                                    ) : (
-                                        'Please use a university email (.ac.za or .edu domain)'
-                                    )}
-                                </div>
-                            )}
+                    <div>
+                        <div className="relative">
+                            <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-twitter-textGray" />
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="input pl-12"
+                                placeholder="Confirm password"
+                                required
+                            />
                         </div>
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Password</label>
-                            <div className="relative">
-                                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="input pl-11"
-                                    placeholder="••••••••"
-                                    required
-                                    minLength={6}
-                                />
-                            </div>
-                        </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? 'Creating account...' : 'Create account'}
+                    </button>
+                </form>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Confirm Password</label>
-                            <div className="relative">
-                                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                                <input
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="input pl-11"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-                        </div>
+                <p className="text-twitter-textGray mt-8 text-sm">
+                    By signing up, you agree to our Terms of Service and Privacy Policy.
+                </p>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Creating account...' : 'Create account'}
-                        </button>
-                    </form>
-
-                    <p className="text-center text-gray-400 mt-6">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-primary-400 hover:text-primary-300 font-medium">
-                            Sign in
-                        </Link>
-                    </p>
-                </div>
+                <p className="text-twitter-textGray mt-6">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-primary-500 hover:underline">
+                        Sign in
+                    </Link>
+                </p>
             </div>
         </div>
     );
