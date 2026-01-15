@@ -4,13 +4,13 @@
     "description": "Connect with your campus community",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0a0a0f",
-    "theme_color": "#7c3aed",
+    "background_color": "#000000",
+    "theme_color": "#1d9bf0",
     "orientation": "portrait",
     "icons": [
         {
-            "src": "/vite.svg",
-            "sizes": "192x192",
+            "src": "/favicon.svg",
+            "sizes": "any",
             "type": "image/svg+xml"
         }
     ]
