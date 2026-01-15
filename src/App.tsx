@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
@@ -9,7 +8,10 @@ import Home from './pages/Home';
 import Explore from './pages/Explore';
 import CreatePost from './pages/CreatePost';
 import Marketplace from './pages/Marketplace';
+import CreateListing from './pages/CreateListing';
+import ListingDetail from './pages/ListingDetail';
 import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -65,7 +67,10 @@ function AppRoutes() {
         <Route path="explore" element={<Explore />} />
         <Route path="create" element={<CreatePost />} />
         <Route path="marketplace" element={<Marketplace />} />
+        <Route path="marketplace/create" element={<CreateListing />} />
+        <Route path="marketplace/:listingId" element={<ListingDetail />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="user/:userId" element={<UserProfile />} />
       </Route>
     </Routes>
   );
