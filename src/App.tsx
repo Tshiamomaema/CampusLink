@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { isSupabaseConfigured } from './lib/supabase';
 import Layout from './components/Layout';
 import LoadingScreen from './components/LoadingScreen';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Home from './pages/Home';
@@ -24,7 +25,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/welcome" replace />;
   }
 
   return <>{children}</>;
@@ -57,6 +58,11 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/welcome" element={
+        <PublicRoute>
+          <Landing />
+        </PublicRoute>
+      } />
       <Route path="/login" element={
         <PublicRoute>
           <Login />
@@ -83,6 +89,9 @@ function AppRoutes() {
         <Route path="profile" element={<Profile />} />
         <Route path="user/:userId" element={<UserProfile />} />
       </Route>
+
+      {/* Redirect unknown routes */}
+      <Route path="*" element={<Navigate to="/welcome" replace />} />
     </Routes>
   );
 }

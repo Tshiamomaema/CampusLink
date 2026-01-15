@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Post as PostType } from '../lib/types';
 import Post from '../components/Post';
 import CreatePostModal from '../components/CreatePostModal';
-import { Plus, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Loader2, RefreshCw, Globe, GraduationCap } from 'lucide-react';
 
 export default function Home() {
     const { profile } = useAuth();
@@ -12,7 +12,7 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [feedFilter, setFeedFilter] = useState<'campus' | 'following'>('campus');
+    const [feedFilter, setFeedFilter] = useState<'campus' | 'general' | 'following'>('campus');
 
     const fetchPosts = useCallback(async () => {
         if (!profile) return;
@@ -29,8 +29,9 @@ export default function Home() {
             .limit(50);
 
         if (feedFilter === 'campus') {
+            // Only posts from user's university
             query = query.eq('university', profile.university);
-        } else {
+        } else if (feedFilter === 'following') {
             // Get posts from followed users
             const { data: following } = await supabase
                 .from('followers')
@@ -42,6 +43,7 @@ export default function Home() {
 
             query = query.in('user_id', followingIds);
         }
+        // 'general' shows all posts (no filter)
 
         const { data, error } = await query;
 
@@ -100,11 +102,23 @@ export default function Home() {
                 <div className="flex">
                     <button
                         onClick={() => setFeedFilter('campus')}
-                        className={`flex-1 py-3 text-center font-medium transition-colors relative ${feedFilter === 'campus' ? 'text-white' : 'text-gray-500'
+                        className={`flex-1 py-3 text-center font-medium transition-colors relative flex items-center justify-center gap-2 ${feedFilter === 'campus' ? 'text-white' : 'text-gray-500'
                             }`}
                     >
+                        <GraduationCap size={16} />
                         My Campus
                         {feedFilter === 'campus' && (
+                            <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary-500 rounded-full" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setFeedFilter('general')}
+                        className={`flex-1 py-3 text-center font-medium transition-colors relative flex items-center justify-center gap-2 ${feedFilter === 'general' ? 'text-white' : 'text-gray-500'
+                            }`}
+                    >
+                        <Globe size={16} />
+                        General
+                        {feedFilter === 'general' && (
                             <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary-500 rounded-full" />
                         )}
                     </button>
@@ -119,6 +133,13 @@ export default function Home() {
                         )}
                     </button>
                 </div>
+            </div>
+
+            {/* Feed Description */}
+            <div className="px-4 py-2 text-center text-sm text-gray-500">
+                {feedFilter === 'campus' && `Showing posts from ${profile?.university || 'your campus'}`}
+                {feedFilter === 'general' && 'Showing posts from all universities'}
+                {feedFilter === 'following' && 'Showing posts from people you follow'}
             </div>
 
             {/* Refresh Button */}
@@ -140,7 +161,9 @@ export default function Home() {
                         <p className="text-gray-400 mb-4">
                             {feedFilter === 'following'
                                 ? "No posts from people you follow yet. Start following some students!"
-                                : "No posts on your campus yet. Be the first to post!"}
+                                : feedFilter === 'campus'
+                                    ? "No posts on your campus yet. Be the first to post!"
+                                    : "No posts yet. Be the first to post!"}
                         </p>
                         <button
                             onClick={() => setShowCreateModal(true)}
