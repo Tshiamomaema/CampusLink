@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share, MoreHorizontal } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Post as PostType } from '../lib/types';
@@ -15,7 +15,6 @@ export default function Post({ post, onLikeUpdate }: PostProps) {
     const { profile } = useAuth();
     const [liked, setLiked] = useState(post.user_has_liked || false);
     const [likesCount, setLikesCount] = useState(post.likes_count || 0);
-    const [showComments, setShowComments] = useState(false);
 
     const handleLike = async () => {
         if (!profile?.id) return;
@@ -39,86 +38,90 @@ export default function Post({ post, onLikeUpdate }: PostProps) {
         onLikeUpdate?.(post.id, !liked);
     };
 
-    const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
+    const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: false });
 
     return (
-        <div className="card p-4">
-            {/* Author Header */}
-            <div className="flex items-start gap-3">
-                <Link to={`/user/${post.user_id}`}>
-                    {post.profiles?.avatar_url ? (
-                        <img
-                            src={post.profiles.avatar_url}
-                            alt=""
-                            className="w-10 h-10 rounded-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
-                            <span className="text-primary-400 font-semibold text-sm">
-                                {post.profiles?.full_name?.charAt(0) || 'U'}
-                            </span>
-                        </div>
-                    )}
-                </Link>
-
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                        <Link to={`/user/${post.user_id}`} className="font-semibold hover:underline truncate">
-                            {post.profiles?.full_name || 'User'}
-                        </Link>
-                        <span className="text-gray-500 text-sm">@{post.profiles?.username}</span>
+        <article className="post-card flex gap-3">
+            {/* Avatar */}
+            <Link to={`/user/${post.user_id}`} className="flex-shrink-0">
+                {post.profiles?.avatar_url ? (
+                    <img
+                        src={post.profiles.avatar_url}
+                        alt=""
+                        className="w-10 h-10 rounded-full object-cover"
+                    />
+                ) : (
+                    <div className="w-10 h-10 rounded-full bg-twitter-darkCard flex items-center justify-center">
+                        <span className="text-twitter-textLight font-semibold text-sm">
+                            {post.profiles?.full_name?.charAt(0) || 'U'}
+                        </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span>{post.university}</span>
-                        <span>•</span>
-                        <span>{timeAgo}</span>
-                    </div>
-                </div>
-
-                <button className="text-gray-400 hover:text-white transition-colors">
-                    <MoreHorizontal size={18} />
-                </button>
-            </div>
+                )}
+            </Link>
 
             {/* Content */}
-            {post.content && (
-                <p className="mt-3 text-gray-200 whitespace-pre-wrap">{post.content}</p>
-            )}
-
-            {/* Image */}
-            {post.image_url && (
-                <div className="mt-3 rounded-xl overflow-hidden">
-                    <img
-                        src={post.image_url}
-                        alt=""
-                        className="w-full object-cover max-h-96"
-                    />
+            <div className="flex-1 min-w-0">
+                {/* Header */}
+                <div className="flex items-center gap-1 text-sm">
+                    <Link to={`/user/${post.user_id}`} className="font-bold text-twitter-textLight hover:underline truncate">
+                        {post.profiles?.full_name || 'User'}
+                    </Link>
+                    <span className="text-twitter-textGray truncate">@{post.profiles?.username}</span>
+                    <span className="text-twitter-textGray">·</span>
+                    <span className="text-twitter-textGray">{timeAgo}</span>
+                    <button className="ml-auto text-twitter-textGray hover:text-primary-500 p-1 hover:bg-primary-500/10 rounded-full">
+                        <MoreHorizontal size={16} />
+                    </button>
                 </div>
-            )}
 
-            {/* Actions */}
-            <div className="flex items-center gap-6 mt-4 pt-3 border-t border-campus-border">
-                <button
-                    onClick={handleLike}
-                    className={`flex items-center gap-2 transition-colors ${liked ? 'text-red-400' : 'text-gray-400 hover:text-red-400'
-                        }`}
-                >
-                    <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
-                    <span className="text-sm">{likesCount}</span>
-                </button>
+                {/* Text */}
+                {post.content && (
+                    <p className="text-twitter-textLight mt-1 whitespace-pre-wrap">{post.content}</p>
+                )}
 
-                <button
-                    onClick={() => setShowComments(!showComments)}
-                    className="flex items-center gap-2 text-gray-400 hover:text-primary-400 transition-colors"
-                >
-                    <MessageCircle size={18} />
-                    <span className="text-sm">{post.comments_count || 0}</span>
-                </button>
+                {/* Image */}
+                {post.image_url && (
+                    <div className="mt-3 rounded-2xl overflow-hidden border border-twitter-border">
+                        <img
+                            src={post.image_url}
+                            alt=""
+                            className="w-full object-cover max-h-96"
+                        />
+                    </div>
+                )}
 
-                <button className="flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors">
-                    <Share2 size={18} />
-                </button>
+                {/* Actions */}
+                <div className="flex items-center justify-between mt-3 max-w-md">
+                    <button className="flex items-center gap-1 text-twitter-textGray hover:text-primary-500 group">
+                        <div className="p-2 rounded-full group-hover:bg-primary-500/10 transition-colors">
+                            <MessageCircle size={18} />
+                        </div>
+                        <span className="text-sm">{post.comments_count || ''}</span>
+                    </button>
+
+                    <button className="flex items-center gap-1 text-twitter-textGray hover:text-green-500 group">
+                        <div className="p-2 rounded-full group-hover:bg-green-500/10 transition-colors">
+                            <Repeat2 size={18} />
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={handleLike}
+                        className={`flex items-center gap-1 group ${liked ? 'text-pink-500' : 'text-twitter-textGray hover:text-pink-500'}`}
+                    >
+                        <div className="p-2 rounded-full group-hover:bg-pink-500/10 transition-colors">
+                            <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+                        </div>
+                        <span className="text-sm">{likesCount || ''}</span>
+                    </button>
+
+                    <button className="flex items-center gap-1 text-twitter-textGray hover:text-primary-500 group">
+                        <div className="p-2 rounded-full group-hover:bg-primary-500/10 transition-colors">
+                            <Share size={18} />
+                        </div>
+                    </button>
+                </div>
             </div>
-        </div>
+        </article>
     );
 }
