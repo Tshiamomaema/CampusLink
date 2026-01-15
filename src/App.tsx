@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { isSupabaseConfigured } from './lib/supabase';
 import Layout from './components/Layout';
 import LoadingScreen from './components/LoadingScreen';
 import Login from './pages/Login';
@@ -12,6 +13,7 @@ import CreateListing from './pages/CreateListing';
 import ListingDetail from './pages/ListingDetail';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
+import SetupGuide from './pages/SetupGuide';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -43,6 +45,15 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  // Show setup guide if Supabase is not configured
+  if (!isSupabaseConfigured) {
+    return (
+      <Routes>
+        <Route path="*" element={<SetupGuide />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       {/* Public Routes */}
