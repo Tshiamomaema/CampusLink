@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,12 +22,7 @@ export default function Marketplace() {
     const [searchQuery, setSearchQuery] = useState('');
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-    useEffect(() => {
-        fetchListings();
-        fetchFavorites();
-    }, [profile, category]);
-
-    const fetchListings = async () => {
+    const fetchListings = useCallback(async () => {
         if (!profile) return;
 
         let query = supabase
@@ -52,9 +47,9 @@ export default function Marketplace() {
             setListings(data as Listing[]);
         }
         setLoading(false);
-    };
+    }, [profile, category]);
 
-    const fetchFavorites = async () => {
+    const fetchFavorites = useCallback(async () => {
         if (!profile) return;
 
         const { data } = await supabase
@@ -65,7 +60,15 @@ export default function Marketplace() {
         if (data) {
             setFavorites(new Set(data.map(f => f.listing_id)));
         }
-    };
+    }, [profile]);
+
+    useEffect(() => {
+        fetchListings();
+    }, [fetchListings]);
+
+    useEffect(() => {
+        fetchFavorites();
+    }, [fetchFavorites]);
 
     const toggleFavorite = async (listingId: string) => {
         if (!profile) return;
@@ -89,10 +92,13 @@ export default function Marketplace() {
         }
     };
 
-    const filteredListings = listings.filter(listing =>
-        listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        listing.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredListings = useMemo(() => {
+        const query = searchQuery.toLowerCase();
+        return listings.filter(listing =>
+            listing.title.toLowerCase().includes(query) ||
+            listing.description?.toLowerCase().includes(query)
+        );
+    }, [listings, searchQuery]);
 
     if (loading) {
         return (
