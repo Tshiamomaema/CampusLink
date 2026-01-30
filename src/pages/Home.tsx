@@ -22,7 +22,9 @@ export default function Home() {
         *,
         profiles:user_id (
           id, full_name, username, avatar_url, university
-        )
+        ),
+        likes(count),
+        comments(count)
       `)
             .order('created_at', { ascending: false })
             .limit(50);
@@ -44,22 +46,23 @@ export default function Home() {
         const { data, error } = await query;
 
         if (!error && data) {
-            const postsWithLikes = await Promise.all(
-                data.map(async (post) => {
-                    const [likesResult, userLikeResult, commentsResult] = await Promise.all([
-                        supabase.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                        supabase.from('likes').select('*').eq('post_id', post.id).eq('user_id', profile.id).single(),
-                        supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                    ]);
+            const postIds = data.map(p => p.id);
 
-                    return {
-                        ...post,
-                        likes_count: likesResult.count || 0,
-                        comments_count: commentsResult.count || 0,
-                        user_has_liked: !!userLikeResult.data,
-                    };
-                })
-            );
+            const { data: userLikes } = await supabase
+                .from('likes')
+                .select('post_id')
+                .eq('user_id', profile.id)
+                .in('post_id', postIds);
+
+            const likedPostIds = new Set(userLikes?.map(l => l.post_id));
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const postsWithLikes = data.map((post: any) => ({
+                ...post,
+                likes_count: post.likes?.[0]?.count ?? 0,
+                comments_count: post.comments?.[0]?.count ?? 0,
+                user_has_liked: likedPostIds.has(post.id)
+            }));
 
             setPosts(postsWithLikes);
         }
