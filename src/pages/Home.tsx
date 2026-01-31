@@ -18,11 +18,14 @@ export default function Home() {
 
         let query = supabase
             .from('posts')
+            // OPTIMIZATION: Fetch counts in the same query to avoid N+1 problem
             .select(`
         *,
         profiles:user_id (
           id, full_name, username, avatar_url, university
-        )
+        ),
+        likes(count),
+        comments(count)
       `)
             .order('created_at', { ascending: false })
             .limit(50);
@@ -44,22 +47,29 @@ export default function Home() {
         const { data, error } = await query;
 
         if (!error && data) {
-            const postsWithLikes = await Promise.all(
-                data.map(async (post) => {
-                    const [likesResult, userLikeResult, commentsResult] = await Promise.all([
-                        supabase.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                        supabase.from('likes').select('*').eq('post_id', post.id).eq('user_id', profile.id).single(),
-                        supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                    ]);
+            const postIds = data.map(p => p.id);
+            const userLikedPostIds = new Set();
 
-                    return {
-                        ...post,
-                        likes_count: likesResult.count || 0,
-                        comments_count: commentsResult.count || 0,
-                        user_has_liked: !!userLikeResult.data,
-                    };
-                })
-            );
+            if (postIds.length > 0) {
+                // OPTIMIZATION: Batch fetch user like status for all posts in one query
+                const { data: userLikes } = await supabase
+                    .from('likes')
+                    .select('post_id')
+                    .eq('user_id', profile.id)
+                    .in('post_id', postIds);
+
+                userLikes?.forEach(like => userLikedPostIds.add(like.post_id));
+            }
+
+            const postsWithLikes = data.map((post) => {
+                const p = post as PostType & { likes: { count: number }[]; comments: { count: number }[] };
+                return {
+                    ...p,
+                    likes_count: p.likes?.[0]?.count || 0,
+                    comments_count: p.comments?.[0]?.count || 0,
+                    user_has_liked: userLikedPostIds.has(p.id),
+                };
+            });
 
             setPosts(postsWithLikes);
         }
