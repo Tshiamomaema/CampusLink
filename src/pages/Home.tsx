@@ -22,7 +22,9 @@ export default function Home() {
         *,
         profiles:user_id (
           id, full_name, username, avatar_url, university
-        )
+        ),
+        likes(count),
+        comments(count)
       `)
             .order('created_at', { ascending: false })
             .limit(50);
@@ -44,24 +46,37 @@ export default function Home() {
         const { data, error } = await query;
 
         if (!error && data) {
-            const postsWithLikes = await Promise.all(
-                data.map(async (post) => {
-                    const [likesResult, userLikeResult, commentsResult] = await Promise.all([
-                        supabase.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                        supabase.from('likes').select('*').eq('post_id', post.id).eq('user_id', profile.id).single(),
-                        supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                    ]);
+            // PERFORMANCE OPTIMIZATION:
+            // Fetch user-specific like status in a single batch query instead of N+1 queries.
+            // This reduces network requests from 1 + N*3 to 2 total requests for the feed.
 
-                    return {
-                        ...post,
-                        likes_count: likesResult.count || 0,
-                        comments_count: commentsResult.count || 0,
-                        user_has_liked: !!userLikeResult.data,
-                    };
-                })
-            );
+            const posts = data as (PostType & {
+                likes: { count: number }[],
+                comments: { count: number }[]
+            })[];
 
-            setPosts(postsWithLikes);
+            const postIds = posts.map(p => p.id);
+            const { data: userLikes } = await supabase
+                .from('likes')
+                .select('post_id')
+                .eq('user_id', profile.id)
+                .in('post_id', postIds);
+
+            const userLikedSet = new Set(userLikes?.map(l => l.post_id));
+
+            const postsWithCounts = posts.map(post => {
+                // Remove temporary count arrays and flatten structure
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { likes, comments, ...rest } = post;
+                return {
+                    ...rest,
+                    likes_count: post.likes?.[0]?.count || 0,
+                    comments_count: post.comments?.[0]?.count || 0,
+                    user_has_liked: userLikedSet.has(post.id)
+                };
+            });
+
+            setPosts(postsWithCounts);
         }
         setLoading(false);
     }, [profile, activeTab]);
