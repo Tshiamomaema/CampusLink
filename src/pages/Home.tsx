@@ -22,7 +22,9 @@ export default function Home() {
         *,
         profiles:user_id (
           id, full_name, username, avatar_url, university
-        )
+        ),
+        likes(count),
+        comments(count)
       `)
             .order('created_at', { ascending: false })
             .limit(50);
@@ -44,24 +46,41 @@ export default function Home() {
         const { data, error } = await query;
 
         if (!error && data) {
-            const postsWithLikes = await Promise.all(
-                data.map(async (post) => {
-                    const [likesResult, userLikeResult, commentsResult] = await Promise.all([
-                        supabase.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                        supabase.from('likes').select('*').eq('post_id', post.id).eq('user_id', profile.id).single(),
-                        supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id),
-                    ]);
+            // Optimization: Fetch user likes in a single batch query
+            // instead of N+1 queries per post.
+            // This reduces requests from 1+N*3 to just 2 requests total.
 
-                    return {
-                        ...post,
-                        likes_count: likesResult.count || 0,
-                        comments_count: commentsResult.count || 0,
-                        user_has_liked: !!userLikeResult.data,
-                    };
-                })
-            );
+            const postIds = data.map(p => p.id);
 
-            setPosts(postsWithLikes);
+            // Batch fetch user's like status for these posts
+            const { data: userLikes } = await supabase
+                .from('likes')
+                .select('post_id')
+                .eq('user_id', profile.id)
+                .in('post_id', postIds);
+
+            const likedPostIds = new Set(userLikes?.map(l => l.post_id) ?? []);
+
+            const postsWithCounts = data.map((post) => {
+                // Cast to intersection type to handle Supabase response structure
+                // where likes/comments are returned as arrays of objects containing count
+                const rawPost = post as PostType & {
+                    likes: { count: number }[];
+                    comments: { count: number }[]
+                };
+
+                return {
+                    ...rawPost,
+                    likes_count: rawPost.likes?.[0]?.count ?? 0,
+                    comments_count: rawPost.comments?.[0]?.count ?? 0,
+                    user_has_liked: likedPostIds.has(rawPost.id),
+                    // Clean up the temporary joined arrays
+                    likes: undefined,
+                    comments: undefined
+                };
+            });
+
+            setPosts(postsWithCounts);
         }
         setLoading(false);
     }, [profile, activeTab]);
